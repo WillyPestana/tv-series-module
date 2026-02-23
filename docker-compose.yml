@@ -1,0 +1,26 @@
+version: "3.3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: tv_series
+      POSTGRES_USER: tv_series
+      POSTGRES_PASSWORD: tv_series
+    ports:
+      - "5432:5432"
+    volumes:
+      - tv_series_db:/var/lib/postgresql/data
+
+  app:
+    build: .
+    environment:
+      PORT: 7777
+      DATABASE_URL: postgresql://tv_series:tv_series@db:5432/tv_series
+    ports:
+      - "7777:7777"
+    depends_on:
+      - db
+
+volumes:
+  tv_series_db:
