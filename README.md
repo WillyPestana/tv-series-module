@@ -6,7 +6,7 @@ A monorepo for the TV Series Module technical challenge: React web UI + Node API
 - `apps/api` - Node.js REST API (Fastify) on port 7777
 - `apps/web` - React UI (Vite)
 - `packages/shared` - Domain models, ports, and use cases
-- `docs` - Architecture, ADRs, roadmap, tasks, and QA checklist
+- `docs` - OpenAPI.yaml
 - `scripts` - Automation and quality gates
 
 ## Quick start (local)
