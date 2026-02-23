@@ -1,0 +1,29 @@
+{
+  "name": "@tv-series-module/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "prisma generate && tsc -p tsconfig.json",
+    "lint": "prisma generate && tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "smoke": "prisma generate && tsc -p tsconfig.json && node tests/e2e/smoke.mjs",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@prisma/client": "5.21.1",
+    "@tv-series-module/shared": "file:../../packages/shared",
+    "@fastify/static": "7.0.3",
+    "fastify": "4.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.0",
+    "vitest": "1.6.0",
+    "prisma": "5.21.1",
+    "typescript": "5.9.3"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  }
+}
