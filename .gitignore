@@ -15,4 +15,4 @@ coverage/
 
 # Markdown policy: only keep README tracked
 *.md
-!README.md
+!/README.md
