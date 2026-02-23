@@ -1,0 +1,13 @@
+{
+  "name": "tv-series-module",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "npm --workspace @tv-series-module/shared run lint && npm --workspace @tv-series-module/api run lint && npm --workspace @tv-series-module/web run lint",
+    "test": "npm --workspace @tv-series-module/shared run build && npm --workspace @tv-series-module/shared run test && npm --workspace @tv-series-module/api run test && npm --workspace @tv-series-module/web run test",
+    "build": "npm --workspace @tv-series-module/shared run build && npm --workspace @tv-series-module/api run build && npm --workspace @tv-series-module/web run build"
+  }
+}

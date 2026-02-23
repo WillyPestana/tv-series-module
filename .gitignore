@@ -1,0 +1,18 @@
+# Dependencies and build artifacts
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+coverage/
+*.log
+
+# Local environment
+.env
+
+# Windows metadata files
+*.Zone.Identifier
+*:Zone.Identifier
+
+# Markdown policy: only keep README tracked
+*.md
+!README.md
