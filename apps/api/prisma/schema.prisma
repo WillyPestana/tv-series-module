@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model EpisodeWatched {
+  id        Int      @id @default(autoincrement())
+  showId    Int
+  episodeId Int
+  watched   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([showId, episodeId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  showId    Int
+  episodeId Int?
+  author    String?
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Rating {
+  id        Int      @id @default(autoincrement())
+  showId    Int
+  score     Int
+  author    String?
+  createdAt DateTime @default(now())
+}
+
+model SavedShow {
+  id        Int      @id @default(autoincrement())
+  showId    Int      @unique
+  createdAt DateTime @default(now())
+}
