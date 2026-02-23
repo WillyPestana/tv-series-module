@@ -1,0 +1,516 @@
+openapi: 3.0.3
+info:
+  title: tv-series-module API
+  version: 0.2.0
+servers:
+  - url: http://localhost:7777
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /api/search:
+    get:
+      summary: Browse or search shows with pagination
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+          description: Optional text query. When empty, API browses TVMaze catalog pages.
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Search/browse results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid pagination values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/shows/{id}:
+    get:
+      summary: Show details merged with watched/comments/ratings
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Show details payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowDetails'
+        '400':
+          description: Invalid show id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/episodes/{episodeId}/watched:
+    put:
+      summary: Toggle episode watched
+      parameters:
+        - in: path
+          name: episodeId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [showId, watched]
+              properties:
+                showId:
+                  type: integer
+                watched:
+                  type: boolean
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '400':
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/comments:
+    get:
+      summary: List comments by show and optional episode
+      parameters:
+        - in: query
+          name: showId
+          required: true
+          schema:
+            type: integer
+        - in: query
+          name: episodeId
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Comment'
+        '400':
+          description: Missing or invalid query params
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Add comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [showId, text]
+              properties:
+                showId:
+                  type: integer
+                episodeId:
+                  type: integer
+                  nullable: true
+                text:
+                  type: string
+                author:
+                  type: string
+                  nullable: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/Comment'
+        '400':
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/ratings:
+    get:
+      summary: List ratings for a show
+      parameters:
+        - in: query
+          name: showId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ratings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ratings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Rating'
+                  summary:
+                    $ref: '#/components/schemas/RatingSummary'
+        '400':
+          description: Missing showId
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      summary: Add rating
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [showId, score]
+              properties:
+                showId:
+                  type: integer
+                score:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                author:
+                  type: string
+                  nullable: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rating:
+                    $ref: '#/components/schemas/Rating'
+        '400':
+          description: Invalid payload or score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/dashboard:
+    get:
+      summary: Aggregated product metrics
+      responses:
+        '200':
+          description: Dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+  /api/library:
+    get:
+      summary: List saved shows
+      parameters:
+        - in: query
+          name: query
+          schema:
+            type: string
+        - in: query
+          name: category
+          schema:
+            type: string
+        - in: query
+          name: yearFilter
+          schema:
+            type: string
+            enum: [all, new, classic]
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: pageSize
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+      responses:
+        '200':
+          description: Saved shows
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryResponse'
+        '400':
+          description: Invalid pagination values
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/library/{showId}:
+    put:
+      summary: Save or unsave a show
+      parameters:
+        - in: path
+          name: showId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [saved]
+              properties:
+                saved:
+                  type: boolean
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+        '400':
+          description: Invalid show id or payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+    ShowSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        year:
+          type: integer
+          nullable: true
+        posterUrl:
+          type: string
+          nullable: true
+        genres:
+          type: array
+          items:
+            type: string
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ShowSummary'
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalResults:
+          type: integer
+          nullable: true
+        hasPrevPage:
+          type: boolean
+        hasNextPage:
+          type: boolean
+    LibraryResponse:
+      allOf:
+        - $ref: '#/components/schemas/SearchResponse'
+        - type: object
+          properties:
+            shows:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShowSummary'
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        season:
+          type: integer
+        number:
+          type: integer
+          nullable: true
+        summary:
+          type: string
+          nullable: true
+        watched:
+          type: boolean
+    SeasonGroup:
+      type: object
+      properties:
+        season:
+          type: integer
+        episodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Episode'
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        showId:
+          type: integer
+        episodeId:
+          type: integer
+          nullable: true
+        author:
+          type: string
+          nullable: true
+        text:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    Rating:
+      type: object
+      properties:
+        id:
+          type: string
+        showId:
+          type: integer
+        score:
+          type: integer
+        author:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    RatingSummary:
+      type: object
+      properties:
+        average:
+          type: number
+          nullable: true
+        count:
+          type: integer
+    ShowDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+          nullable: true
+        genres:
+          type: array
+          items:
+            type: string
+        posterUrl:
+          type: string
+          nullable: true
+        seasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeasonGroup'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+        ratings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Rating'
+        ratingSummary:
+          $ref: '#/components/schemas/RatingSummary'
+        saved:
+          type: boolean
+    RankedShow:
+      type: object
+      properties:
+        showId:
+          type: integer
+        title:
+          type: string
+        posterUrl:
+          type: string
+          nullable: true
+        value:
+          type: number
+    Dashboard:
+      type: object
+      properties:
+        totals:
+          type: object
+          properties:
+            comments:
+              type: integer
+            watchedEpisodes:
+              type: integer
+            ratings:
+              type: integer
+        topCommentedShows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedShow'
+        topWatchedShows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedShow'
+        topRatedShows:
+          type: array
+          items:
+            $ref: '#/components/schemas/RankedShow'
